@@ -10,25 +10,41 @@ public class DataCleaner {
 
     public static List<Map<String, String>> clean(List<Map<String, String>> data) {
         Iterator<Map<String, String>> iterator = data.iterator();
+        String lastLeadingRowClient = null;
         while (iterator.hasNext()) {
             Map<String, String> row = iterator.next();
-            int currentIndex = data.indexOf(row);
-            Optional<Map<String, String>> nextRow = getNextRow(data, currentIndex);
-    
-            if (isSummaryRow(row) || isSuperfluousData(row, nextRow)) {
+
+            if (isLeadingRow(row)) {
+                lastLeadingRowClient = row.get(AppConstants.CLIENT_NAME_KEY);
+            }
+
+            if (isSummaryRow(row)) { // deletes summary rows
                 iterator.remove();
-            } else if (!isRowAssociatedToClient(row) && currentIndex > 0) {
-                Map<String, String> prevRow = data.get(currentIndex - 1);
-                String prevRowName = prevRow.get(AppConstants.CLIENT_NAME_KEY); 
-                row.put(AppConstants.CLIENT_NAME_KEY, prevRowName);
+            } else if (isIrrelevantDocumentation(row) || isMeaninglessData(row)) { 
+                int currentIndex = data.indexOf(row); // negligible performance impact for the small datasets (30-40 rows) this is going to process
+                Optional<Map<String, String>> nextRowOpt = getAdjacentRow(data, currentIndex, RowType.NEXT);
+                // copies Client to the next row before deleting if the next one is associated with the former but does not have a Client
+                // example: row 1 - client_name + IRRELEVANT DATA; row 2 - no name + RELEVANT DATA identified with the previous row
+                if (isLeadingRow(row) && nextRowOpt.map(DataCleaner::isDependentOnPreviousRow).orElse(false)) { 
+                    copyClient(nextRowOpt.get(), lastLeadingRowClient); // can safely unwrap bc it only gets here if there is a next row
+                }
+                iterator.remove();
+            } else if (isDependentOnPreviousRow(row)) {
+                copyClient(row, lastLeadingRowClient);
             }
         }
         return data;
     }
 
-    private static Optional<Map<String, String>> getNextRow(List<Map<String, String>> data, int currentIndex) {
-        if (currentIndex < data.size() - 1) {
+    private enum RowType {
+        PREVIOUS, NEXT
+    }
+
+    private static Optional<Map<String, String>> getAdjacentRow(List<Map<String, String>> data, int currentIndex, RowType mode) {
+        if (mode == RowType.NEXT && currentIndex < data.size() - 1) {
             return Optional.of(data.get(currentIndex + 1));
+        } else if (mode == RowType.PREVIOUS && currentIndex > 0) {
+            return Optional.of(data.get(currentIndex - 1));
         } else {
             return Optional.empty();
         }
@@ -38,23 +54,23 @@ public class DataCleaner {
         return row.values().stream().anyMatch(value -> value.contains(AppConstants.SUMMARY_TEXT));
     }
 
-    private static boolean isSuperfluousData(Map<String, String> row, Optional<Map<String, String>> nextRowOpt) {
-        if (row.containsValue(AppConstants.DOCUMENT_TEXT)) {
-            if (isRowAssociatedToClient(row) && nextRowOpt.map(DataCleaner::isNextRowRelated).orElse(false)) {
-                // copies name to next row in preparation before the current one is deleted
-                nextRowOpt.ifPresent(nextRow -> nextRow.put(AppConstants.CLIENT_NAME_KEY, row.get(AppConstants.CLIENT_NAME_KEY)));
-            } 
-            return true;
-        } else {
-            return false;
-        }
+    private static boolean isMeaninglessData(Map<String, String> row) {
+        return !row.containsKey(AppConstants.ACTIVITY_DESCRIPTION);
     }
 
-    private static boolean isRowAssociatedToClient(Map<String, String> row) {
+    private static boolean isIrrelevantDocumentation(Map<String, String> row) {
+        return row.containsValue(AppConstants.DOCUMENT_TEXT);
+    }
+
+    private static boolean isLeadingRow(Map<String, String> row) {
         return row.containsKey(AppConstants.CLIENT_NAME_KEY);
     }
 
-    private static boolean isNextRowRelated(Map<String, String> nextRow) {
-        return !nextRow.containsKey(AppConstants.CLIENT_NAME_KEY);
+    private static boolean isDependentOnPreviousRow(Map<String, String> row) {
+        return !row.containsKey(AppConstants.CLIENT_NAME_KEY);
+    }
+
+    private static void copyClient(Map<String, String> row, String clientName) {
+        row.put(AppConstants.CLIENT_NAME_KEY, clientName);
     }
 }
