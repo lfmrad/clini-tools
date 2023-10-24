@@ -1,5 +1,8 @@
 # CUSTOM
+# test files
 /test-resources
+# legacy code / experiments
+/src/main/java/xyz/lfmrad/clinitools/wip
 
 # MAVEN
 # Compiled bytecode

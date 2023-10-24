@@ -4,20 +4,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import xyz.lfmrad.clinitools.common.AppConstants;
+import xyz.lfmrad.clinitools.Configuration;
 
-public class DataCleaner {
+public final class DataCleaner {
+    private DataCleaner() {
+        throw new AssertionError("DataCleaner should not be instantiated.");
+    }
 
     public static List<Map<String, String>> clean(List<Map<String, String>> data) {
         Iterator<Map<String, String>> iterator = data.iterator();
         String lastLeadingRowClient = null;
         while (iterator.hasNext()) {
             Map<String, String> row = iterator.next();
-
             if (isLeadingRow(row)) {
-                lastLeadingRowClient = row.get(AppConstants.CLIENT_NAME_KEY);
+                lastLeadingRowClient = row.get(Configuration.getAppointmentsHeaders().get("name"));
             }
-
             if (isSummaryRow(row)) { // deletes summary rows
                 iterator.remove();
             } else if (isIrrelevantDocumentation(row) || isMeaninglessData(row)) { 
@@ -51,26 +52,26 @@ public class DataCleaner {
     }
     
     private static boolean isSummaryRow(Map<String, String> row) {
-        return row.values().stream().anyMatch(value -> value.contains(AppConstants.SUMMARY_TEXT));
+        return row.values().stream().anyMatch(value -> value.contains(Configuration.getAppointmentsHeaders().get("summaryText")));
     }
 
     private static boolean isMeaninglessData(Map<String, String> row) {
-        return !row.containsKey(AppConstants.ACTIVITY_DESCRIPTION);
+        return !row.containsKey(Configuration.getAppointmentsHeaders().get("activities"));
     }
 
     private static boolean isIrrelevantDocumentation(Map<String, String> row) {
-        return row.containsValue(AppConstants.DOCUMENT_TEXT);
+        return row.containsValue(Configuration.getOtherText().get("documentText"));
     }
 
     private static boolean isLeadingRow(Map<String, String> row) {
-        return row.containsKey(AppConstants.CLIENT_NAME_KEY);
+        return row.containsKey(Configuration.getOtherText().get("documentText"));
     }
 
     private static boolean isDependentOnPreviousRow(Map<String, String> row) {
-        return !row.containsKey(AppConstants.CLIENT_NAME_KEY);
+        return !row.containsKey(Configuration.getAppointmentsHeaders().get("name"));
     }
 
     private static void copyClient(Map<String, String> row, String clientName) {
-        row.put(AppConstants.CLIENT_NAME_KEY, clientName);
+        row.put(Configuration.getAppointmentsHeaders().get("name"), clientName);
     }
 }

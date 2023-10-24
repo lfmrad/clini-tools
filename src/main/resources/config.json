@@ -1,0 +1,64 @@
+{
+  "customDateTimePatterns": {
+    "dateAndTime": "yyyy-MM-dd HH:mm:ss",
+    "date": "yyyy-MM-dd",
+    "time": "HH:mm:ss",
+    "zoneId": "Europe/Madrid"
+  },
+  "appointmentsHeaders": {
+      "date": "F. Actuación",
+      "startHour": "Hora Inicio",
+      "finishHour": "Hora Final",
+      "name": "Nombre",
+      "activities": "Descripción",
+      "price": "Precio",
+      "costWithTax": "Coste Bruto",
+      "costWithTaxThirdParty": "Costes de Terceros",
+      "paymentStatus": "Estado Cobro",
+      "notes": "Notas"
+    },
+    "paymentHeaders": {
+        "date": "Fecha Alta",
+        "name": "Nombre",
+        "activities": "Concepto",
+        "paymentMethod": "Forma de Cobro",
+        "paidAmount": "Total",
+        "paymentStatus": "Cobrado"
+    },
+    "launchCommands": {
+      "settlement": "-liq",
+      "expandedSettlement": "-liq_ex",
+      "debug": "-debug"
+    },
+    "filesAndPaths": {
+      "deploymentFolder": "./",
+      "testFolder": "test-resources/",
+      "outputFolder": "liquidaciones/",
+      "xlsType": ".xlsx",
+      "htlmType": ".html",
+      "historyFilename": "historial",
+      "paymentsFilename": "cobros",
+      "settlementTemplateFilename": "liq-template",
+      "settlementFilename": "liquidación",
+      "templateHeaderRows": "5",
+      "dataHeaderRows": "1"
+    },
+    "otherText": {
+        "summaryText": "Total",
+        "documentText": "Documento firmado",
+        "historyError": "*** ERROR: aparece en cobros pero no en historial. ***",
+        "unknownPayment": "DESCONOCIDO",
+        "pendingPayment": "Pendiente de cobrar",
+        "cashPayment": "Efectivo",
+        "cardPayment": "Tarjeta",
+        "bizumPayment": "Bizum",
+        "numberOfClients": "Número de clientes: ",
+        "summaryHeading": "*** TOTALES ***",
+        "totalPVP": "Total PVP: ",
+        "totalCostWithTax": "Coste Total Clínica (con IVA): ",
+        "totalCostWithTaxThirdParty": "Coste Total Terceros (con IVA): ",
+        "totalCashPayments": "Total Pagado Efectivo: ",
+        "totalCardPayments": "Total Pagado Tarjeta: ",
+        "totalBizumPayments": "Total Pagado Bizum: "
+    }
+  }
