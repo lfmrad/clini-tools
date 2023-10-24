@@ -8,7 +8,8 @@
 # Compiled bytecode
 /target/
 
-# IDE-specific files (IntelliJ IDEA or Eclipse)
+# IDE-specific files (vscode, IntelliJ IDEA, Eclipse)
+/.vscode/
 /.idea/
 *.iml
 /.classpath
