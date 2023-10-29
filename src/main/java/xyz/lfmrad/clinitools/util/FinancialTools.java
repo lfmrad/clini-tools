@@ -76,7 +76,8 @@ public final class FinancialTools {
                 }
             
                 // comes back to the initial row after adding several activities 
-                row = sheet.getRow(rowIndex - additionalRowsCreated); 
+                int correctedIndex = rowIndex - additionalRowsCreated;
+                row = sheet.getRow(correctedIndex); 
 
                 Cell cashAmountCell = row.createCell(6);
                 cashAmountCell.setCellValue(cashTotal);
@@ -90,8 +91,13 @@ public final class FinancialTools {
                 paymentStatusCell.setCellValue(appointment.getPaymentStatus());
                 Cell notesCell = row.createCell(11);
                 notesCell.setCellValue(appointment.getNotes());
+
                 createdColumns = row.getLastCellNum();
 
+                // TEMPORAL FUNCTIONALITY
+                // Implemented through Excel formulas. Pending actual implementation.
+                addTemporaryExcelFormulas(row, correctedIndex + 1, cardTotal + bizumTotal); 
+            
                 int lastRowIndex = rowIndex - 1;  // adjusts for the last row written in this iteration
                 Row lastRowWritten = sheet.getRow(lastRowIndex);
                 addClientSeparatorLine(lastRowWritten, workbook, createdColumns);
@@ -101,6 +107,17 @@ public final class FinancialTools {
             writeToFile(workbook, settlementDate);
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private static void addTemporaryExcelFormulas(Row row, int excelIndex, double cardBizumTotal) {
+        Cell formulaCell1 = row.createCell(12);
+        formulaCell1.setCellFormula("IF(O" + (excelIndex) + "=\"x\",D" + (excelIndex) + ",\"-\")");
+        Cell formulaCell2 = row.createCell(13);
+        formulaCell2.setCellFormula("IF(O" + (excelIndex) + "=\"x\",J" + (excelIndex) + ",\"-\")");
+        Cell formulaCell3 = row.createCell(14);
+        if (cardBizumTotal > 0) {
+            formulaCell3.setCellValue("x");
         }
     }
 
@@ -144,6 +161,14 @@ public final class FinancialTools {
             modifiedCellStyle.setFillForegroundColor(IndexedColors.BLACK.getIndex());
             modifiedCellStyle.setFillPattern(FillPatternType.SOLID_FOREGROUND);
             cell.setCellStyle(modifiedCellStyle);
+        }
+    }
+
+    public static String parseEmptySymbolIfZero(double valueToParse) {
+        if (valueToParse == 0) {
+            return Configuration.getOtherText().get("zeroSymbol");
+        } else {
+            return Double.toString(valueToParse);
         }
     }
 

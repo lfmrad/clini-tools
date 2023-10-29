@@ -40,7 +40,7 @@
       "paymentsFilename": "cobros",
       "settlementTemplateFilename": "liq-template",
       "settlementFilename": "liquidación",
-      "templateHeaderRows": "5",
+      "templateHeaderRows": "8",
       "dataHeaderRows": "1"
     },
     "otherText": {
@@ -59,6 +59,7 @@
         "totalCostWithTaxThirdParty": "Coste Total Terceros (con IVA): ",
         "totalCashPayments": "Total Pagado Efectivo: ",
         "totalCardPayments": "Total Pagado Tarjeta: ",
-        "totalBizumPayments": "Total Pagado Bizum: "
+        "totalBizumPayments": "Total Pagado Bizum: ",
+        "zeroSymbol": "-"
     }
   }
