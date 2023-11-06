@@ -52,14 +52,17 @@
         "cashPayment": "Efectivo",
         "cardPayment": "Tarjeta",
         "bizumPayment": "Bizum",
+        "financingInstallment": "Financiación",
         "numberOfClients": "Número de clientes: ",
         "summaryHeading": "*** TOTALES ***",
         "totalPVP": "Total PVP: ",
+        "totalCost": "Coste Total (con IVA):",
         "totalCostWithTax": "Coste Total Clínica (con IVA): ",
         "totalCostWithTaxThirdParty": "Coste Total Terceros (con IVA): ",
         "totalCashPayments": "Total Pagado Efectivo: ",
         "totalCardPayments": "Total Pagado Tarjeta: ",
         "totalBizumPayments": "Total Pagado Bizum: ",
+        "totalFinancingInstallments": "Total Pagado Financiaciones: ",
         "zeroSymbol": "-"
     }
   }

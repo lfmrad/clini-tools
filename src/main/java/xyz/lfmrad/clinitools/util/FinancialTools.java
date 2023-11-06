@@ -62,41 +62,30 @@ public final class FinancialTools {
                     totalCost += -(activity.getCostWithTax() + activity.getCostWithTaxThirdParty());
                 }
             
-                double cashTotal = 0;
-                double cardTotal = 0;
-                double bizumTotal = 0;
-                for (Payment payment : appointment.getPayments()) {
-                    if (Configuration.getOtherText().get("cashPayment").equals(payment.getPaymentMethod())) {
-                        cashTotal += payment.getAmount();
-                    } else if (Configuration.getOtherText().get("cardPayment").equals(payment.getPaymentMethod())) {
-                        cardTotal += payment.getAmount();
-                    } else if (Configuration.getOtherText().get("bizumPayment").equals(payment.getPaymentMethod())) {
-                        bizumTotal += payment.getAmount();
-                    }
-                }
-            
                 // comes back to the initial row after adding several activities 
                 int correctedIndex = rowIndex - additionalRowsCreated;
                 row = sheet.getRow(correctedIndex); 
 
                 Cell cashAmountCell = row.createCell(6);
-                cashAmountCell.setCellValue(cashTotal);
+                cashAmountCell.setCellValue(appointment.getCashTotal());
                 Cell cardAmountCell = row.createCell(7);
-                cardAmountCell.setCellValue(cardTotal);
+                cardAmountCell.setCellValue(appointment.getCardTotal());
                 Cell bizumAmountCell = row.createCell(8);
-                bizumAmountCell.setCellValue(bizumTotal);
-                Cell netProfit = row.createCell(9);
+                bizumAmountCell.setCellValue(appointment.getBizumTotal());
+                Cell financingAmountCell = row.createCell(9);
+                financingAmountCell.setCellValue(appointment.getFinancingTotal());
+                Cell netProfit = row.createCell(10);
                 netProfit.setCellValue(totalPrice + totalCost);
-                Cell paymentStatusCell = row.createCell(10);
+                Cell paymentStatusCell = row.createCell(11);
                 paymentStatusCell.setCellValue(appointment.getPaymentStatus());
-                Cell notesCell = row.createCell(11);
+                Cell notesCell = row.createCell(12);
                 notesCell.setCellValue(appointment.getNotes());
 
                 createdColumns = row.getLastCellNum();
 
                 // TEMPORAL FUNCTIONALITY
                 // Implemented through Excel formulas. Pending actual implementation.
-                addTemporaryExcelFormulas(row, correctedIndex + 1, cardTotal + bizumTotal); 
+                addTemporaryExcelFormulas(row, correctedIndex + 1, appointment); 
             
                 int lastRowIndex = rowIndex - 1;  // adjusts for the last row written in this iteration
                 Row lastRowWritten = sheet.getRow(lastRowIndex);
@@ -110,14 +99,15 @@ public final class FinancialTools {
         }
     }
 
-    private static void addTemporaryExcelFormulas(Row row, int excelIndex, double cardBizumTotal) {
-        Cell formulaCell1 = row.createCell(12);
-        formulaCell1.setCellFormula("IF(O" + (excelIndex) + "=\"x\",D" + (excelIndex) + ",\"-\")");
-        Cell formulaCell2 = row.createCell(13);
-        formulaCell2.setCellFormula("IF(O" + (excelIndex) + "=\"x\",J" + (excelIndex) + ",\"-\")");
-        Cell formulaCell3 = row.createCell(14);
-        if (cardBizumTotal > 0) {
-            formulaCell3.setCellValue("x");
+    private static void addTemporaryExcelFormulas(Row row, int excelIndex, Appointment appointment) {
+        
+        Cell invCell = row.createCell(13);
+        invCell.setCellValue(appointment.getTotalPVP());
+        Cell profitCell = row.createCell(14);
+        profitCell.setCellValue(appointment.getProfit());
+        Cell flagCell = row.createCell(15);
+        if ((appointment.getCardTotal() + appointment.getBizumTotal()) > 0) {
+            flagCell.setCellValue("x");
         }
     }
 
@@ -174,40 +164,33 @@ public final class FinancialTools {
 
     public static void printSummary(List<Appointment> appointments, boolean includeUnpaid) {
         double totalPVP = 0.0;
-        double totalCostWithTax = 0.0;
-        double totalCostWithTaxThirdParty = 0.0;
+        double totalCost = 0.0;
         double totalCashPayments = 0.0;
         double totalCardPayments = 0.0;
         double totalBizumPayments = 0.0;
+        double totalFinancing = 0.0;
         int clientsThatHaveNotPaid = 0;
-
+        
         for (Appointment appointment : appointments) {
             if(!includeUnpaid && isPaymentPending(appointment)) {
                     clientsThatHaveNotPaid++;
                     continue;
             }
-            for (Activity activity : appointment.getActivities()) {
-                totalPVP += activity.getPrice();
-                totalCostWithTax += activity.getCostWithTax();
-                totalCostWithTaxThirdParty += activity.getCostWithTaxThirdParty();
-            }
-            for (Payment payment : appointment.getPayments()) {
-                if (Configuration.getOtherText().get("cashPayment").equals(payment.getPaymentMethod())) {
-                    totalCashPayments += payment.getAmount();
-                } else if (Configuration.getOtherText().get("cardPayment").equals(payment.getPaymentMethod())) {
-                    totalCardPayments += payment.getAmount();
-                } else if (Configuration.getOtherText().get("bizumPayment").equals(payment.getPaymentMethod())) {
-                    totalBizumPayments += payment.getAmount();
-                }
-            }
+            totalPVP += appointment.getTotalPVP();
+            totalCost += appointment.getTotalCost();
+            totalCashPayments += appointment.getCashTotal();
+            totalCardPayments += appointment.getCardTotal();
+            totalBizumPayments += appointment.getBizumTotal();
+            totalFinancing += appointment.getFinancingTotal();
         }
+        
         System.out.println(Configuration.getOtherText().get("summaryHeading"));
         System.out.println(Configuration.getOtherText().get("numberOfClients") + (appointments.size() - clientsThatHaveNotPaid));
         System.out.println(Configuration.getOtherText().get("totalPVP") + totalPVP);
-        System.out.println(Configuration.getOtherText().get("totalCostWithTax") + totalCostWithTax);
-        System.out.println(Configuration.getOtherText().get("totalCostWithTaxThirdParty") + totalCostWithTaxThirdParty);
+        System.out.println(Configuration.getOtherText().get("totalCost") + totalCost);
         System.out.println(Configuration.getOtherText().get("totalCashPayments") + totalCashPayments);
         System.out.println(Configuration.getOtherText().get("totalCardPayments") + totalCardPayments);
         System.out.println(Configuration.getOtherText().get("totalBizumPayments") + totalBizumPayments);
+        System.out.println(Configuration.getOtherText().get("totalFinancingInstallments") + totalFinancing);
     }
 }

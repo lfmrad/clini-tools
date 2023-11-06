@@ -4,6 +4,8 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import xyz.lfmrad.clinitools.Configuration;
+
 public class Appointment {
     private String clientName;
     private ZonedDateTime appointmentTimeData;
@@ -40,6 +42,53 @@ public class Appointment {
     public String getNotes() {
         return notes;
     }
+
+    public double getTotalPVP() {
+        double totalPVP = 0;
+        for (Activity activity : activities) {
+            totalPVP += activity.getPrice();
+        }
+        return totalPVP;
+    }
+
+    public double getTotalCost() {
+        double totalCost = 0;
+        for (Activity activity : activities) {
+            totalCost += -(activity.getCostWithTax() + activity.getCostWithTaxThirdParty());
+        }
+        return totalCost;
+    }
+
+    public double getCashTotal() {
+        return getTotalPaidFor(Configuration.getOtherText().get("cashPayment"));
+    }
+
+    public double getCardTotal() {
+        return getTotalPaidFor(Configuration.getOtherText().get("cardPayment"));
+    }
+
+    public double getBizumTotal() {
+        return getTotalPaidFor(Configuration.getOtherText().get("bizumPayment"));
+    }
+
+    public double getFinancingTotal() {
+        return getTotalPaidFor(Configuration.getOtherText().get("financingInstallment"));
+    }
+
+    private double getTotalPaidFor(String paymentMethod) {
+        double totalPaid = 0;
+        for (Payment payment : payments) {
+            if (paymentMethod.equalsIgnoreCase(payment.getPaymentMethod())) {
+                totalPaid += payment.getAmount();
+            } 
+        }
+        return totalPaid;
+    }
+
+    public double getProfit() {
+        return getTotalPVP() + getTotalCost();
+    }
+
 
     public boolean setClientName(String clientName) {
         if (this.clientName == null) { 
