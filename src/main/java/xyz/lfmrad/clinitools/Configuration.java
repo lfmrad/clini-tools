@@ -7,6 +7,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
+import java.text.Normalizer;
 
 public class Configuration {
     // Static members holding configuration data
@@ -91,6 +92,18 @@ public class Configuration {
 
     public static int getNumberOfHeaders(String key) {
         return Integer.parseInt(filesAndPaths.get(key));
+    }
+
+    // STRING TOOLS; move to independent class?
+    public static String removeDiacriticalMarks(String string) {
+        // Normalize the string to decomposed form, where diacritical marks are separated from characters
+        String normalized = Normalizer.normalize(string, Normalizer.Form.NFD);
+        // Remove diacritical marks using a regex that matches all non-ASCII characters
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+    }
+    public static boolean compareStringsIgnoringGrammar(String str1, String str2) {
+        // Remove diacritics and compare strings ignoring case
+        return removeDiacriticalMarks(str1).equalsIgnoreCase(removeDiacriticalMarks(str2));
     }
 
     public static Map<String, String> getCustomDateTimePatterns() {

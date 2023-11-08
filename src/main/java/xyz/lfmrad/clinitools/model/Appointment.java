@@ -78,7 +78,7 @@ public class Appointment {
     private double getTotalPaidFor(String paymentMethod) {
         double totalPaid = 0;
         for (Payment payment : payments) {
-            if (paymentMethod.equalsIgnoreCase(payment.getPaymentMethod())) {
+            if (Configuration.compareStringsIgnoringGrammar(paymentMethod, payment.getPaymentMethod())) {
                 totalPaid += payment.getAmount();
             } 
         }

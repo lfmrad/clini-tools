@@ -52,7 +52,7 @@
         "cashPayment": "Efectivo",
         "cardPayment": "Tarjeta",
         "bizumPayment": "Bizum",
-        "financingInstallment": "Financiación",
+        "financingInstallment": "Financiacion",
         "numberOfClients": "Número de clientes: ",
         "summaryHeading": "*** TOTALES ***",
         "totalPVP": "Total PVP: ",
