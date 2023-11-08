@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.text.Normalizer;
 
@@ -90,7 +91,7 @@ public class Configuration {
         return workingDir + filename + ".html";
     }
 
-    public static int getNumberOfHeaders(String key) {
+    public static int getExcelIndex(String key) {
         return Integer.parseInt(filesAndPaths.get(key));
     }
 
@@ -134,8 +135,17 @@ public class Configuration {
         return DateTimeFormatter.ofPattern(customDateTimePatterns.get("dateAndTime"));
     }
 
-    public static DateTimeFormatter getDateFormat() {
-        return DateTimeFormatter.ofPattern(customDateTimePatterns.get("date"));
+    public static DateTimeFormatter getDateFormat(boolean dayFirst) {
+        if (dayFirst) {
+            return DateTimeFormatter.ofPattern(customDateTimePatterns.get("dateDayFirst"));
+        } else {
+            return DateTimeFormatter.ofPattern(customDateTimePatterns.get("date"));
+        }
+        
+    }
+
+    public static DateTimeFormatter getDateFormatLocalizedVerbose() {
+        return DateTimeFormatter.ofPattern(customDateTimePatterns.get("localVerboseDate"), Locale.forLanguageTag(customDateTimePatterns.get("locale")));
     }
 
     public static DateTimeFormatter getTimeFormat() {

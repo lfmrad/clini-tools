@@ -25,9 +25,18 @@ public final class FinancialTools {
 
         try (XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream(new File(templateFilepath)))) {
             Sheet sheet = workbook.getSheetAt(0);
-            int rowIndex = Configuration.getNumberOfHeaders("templateHeaderRows");
+            int rowIndex = Configuration.getExcelIndex("templateHeaderRows");
             int createdColumns = 0;
-            String settlementDate = getDateFromAppointment(appointments.get(0));
+            
+            Appointment refereceAppointmentForDate = appointments.get(0);
+            String settlementDate = DateTools.getDateAsFormattedString(refereceAppointmentForDate.getAppointmentTimeData(), false);
+            String dateFieldTitle = DateTools.getDateAsLocalizedVerboseString(refereceAppointmentForDate.getAppointmentTimeData(), true);
+            if (Configuration.isDebugEnabled()) { 
+                System.out.println("EXTRACTED FORMATTED DATES: " + "settlement: " + settlementDate + " / dateField: " + dateFieldTitle);
+            }
+            Row dateTitleFieldRow = sheet.getRow(Configuration.getExcelIndex("dateFieldExcelIndex") - 1);
+            Cell dateTitleCell = dateTitleFieldRow.getCell(0);
+            dateTitleCell.setCellValue(dateFieldTitle);
 
             for (Appointment appointment : appointments) {
                 if(!includeUnpaid && isPaymentPending(appointment)) {
@@ -121,7 +130,7 @@ public final class FinancialTools {
     }
 
     private static String getDateFromAppointment(Appointment appointment) {
-        return DateTools.getDateAsFormattedString(appointment.getAppointmentTimeData());
+        return DateTools.getDateAsFormattedString(appointment.getAppointmentTimeData(), false);
     }
 
     private static boolean isPaymentPending(Appointment appointment) {

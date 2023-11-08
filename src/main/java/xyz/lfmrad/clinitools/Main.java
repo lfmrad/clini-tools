@@ -34,7 +34,7 @@ public class Main {
     private static void readData() {
         String historyFilename = Configuration.getFilesAndPaths().get("historyFilename");
         String paymentsFilename = Configuration.getFilesAndPaths().get("paymentsFilename");
-        int numberOfHeaderRows = Configuration.getNumberOfHeaders("dataHeaderRows");
+        int numberOfHeaderRows = Configuration.getExcelIndex("dataHeaderRows");
         appointments = ExcelTools.readXlxsSheet(Configuration.getXlsxFilePath(historyFilename), numberOfHeaderRows);
         payments = ExcelTools.readXlxsSheet(Configuration.getXlsxFilePath(paymentsFilename), numberOfHeaderRows);
         if (Configuration.isDebugEnabled()) {

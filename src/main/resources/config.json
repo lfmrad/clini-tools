@@ -2,8 +2,11 @@
   "customDateTimePatterns": {
     "dateAndTime": "yyyy-MM-dd HH:mm:ss",
     "date": "yyyy-MM-dd",
+    "dateDayFirst": "dd-MM-yyyy",
+    "localVerboseDate": "EEEE, d 'de' MMMM, yyyy",
     "time": "HH:mm:ss",
-    "zoneId": "Europe/Madrid"
+    "zoneId": "Europe/Madrid",
+    "locale": "es-ES"
   },
   "appointmentsHeaders": {
       "date": "F. Actuación",
@@ -41,7 +44,8 @@
       "settlementTemplateFilename": "liq-template",
       "settlementFilename": "liquidación",
       "templateHeaderRows": "8",
-      "dataHeaderRows": "1"
+      "dataHeaderRows": "1",
+      "dateFieldExcelIndex": "4"
     },
     "otherText": {
         "summaryText": "Total",

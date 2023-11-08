@@ -57,7 +57,7 @@ public final class DataBuilder {
                 targetAppointment.setPaymentStatus(Configuration.getOtherText().get("unknownPayment"));
 
                 String dateAsString = paymentRow.get(Configuration.getPaymentHeaders().get("date"));
-                LocalDate date = LocalDate.parse(dateAsString, Configuration.getDateFormat());
+                LocalDate date = LocalDate.parse(dateAsString, Configuration.getDateFormat(false));
                 ZonedDateTime defaultDateTime = date.atStartOfDay(Configuration.getZoneId());
 
                 String activity = paymentRow.get(Configuration.getPaymentHeaders().get("activities"));

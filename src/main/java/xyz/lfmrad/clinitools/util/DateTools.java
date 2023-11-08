@@ -15,7 +15,8 @@ import xyz.lfmrad.clinitools.Configuration;
 
 public final class DateTools {
     private static final DateTimeFormatter DATE_TIME_FORMATTER = Configuration.getDateAndTimeFormat();
-    private static final DateTimeFormatter DATE_FORMATTER = Configuration.getDateFormat();
+    private static final DateTimeFormatter DATE_FORMATTER = Configuration.getDateFormat(false);
+    private static final DateTimeFormatter DATE_VERBOSE = Configuration.getDateFormatLocalizedVerbose();
     private static final DateTimeFormatter TIME_FORMATTER = Configuration.getTimeFormat();
 
     private DateTools() {
@@ -58,7 +59,11 @@ public final class DateTools {
         return dateTime.format(DATE_TIME_FORMATTER);
     }
 
-    public static String getDateAsFormattedString(ZonedDateTime dateTime) {
-        return dateTime.format(DATE_FORMATTER);
+    public static String getDateAsFormattedString(ZonedDateTime dateTime, boolean dayFirst) {
+        return dateTime.format(Configuration.getDateFormat(dayFirst));
+    }
+
+    public static String getDateAsLocalizedVerboseString(ZonedDateTime dateTime, boolean dayFirst) {
+        return dateTime.format(DATE_VERBOSE);
     }
 }
