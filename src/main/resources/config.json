@@ -43,9 +43,9 @@
       "paymentsFilename": "cobros",
       "settlementTemplateFilename": "liq-template",
       "settlementFilename": "liquidación",
-      "templateHeaderRows": "8",
+      "templateHeaderRows": "11",
       "dataHeaderRows": "1",
-      "dateFieldExcelIndex": "4"
+      "dateFieldExcelIndex": "7"
     },
     "otherText": {
         "summaryText": "Total",
@@ -58,15 +58,22 @@
         "bizumPayment": "Bizum",
         "financingInstallment": "Financiacion",
         "numberOfClients": "Número de clientes: ",
-        "summaryHeading": "*** TOTALES ***",
+        "summaryHeading": "********* TOTALES *********",
         "totalPVP": "Total PVP: ",
         "totalCost": "Coste Total (con IVA):",
         "totalCostWithTax": "Coste Total Clínica (con IVA): ",
         "totalCostWithTaxThirdParty": "Coste Total Terceros (con IVA): ",
+        "totalPaid": "TOTAL PAGADO: ",
         "totalCashPayments": "Total Pagado Efectivo: ",
         "totalCardPayments": "Total Pagado Tarjeta: ",
         "totalBizumPayments": "Total Pagado Bizum: ",
         "totalFinancingInstallments": "Total Pagado Financiaciones: ",
-        "zeroSymbol": "-"
+        "parityCheck": "TEST VERIFICACIÓN DATOS (PVP-PAGADO): ",
+        "parityCheckSuccess": "CORRECTO! >>>> TOTAL PVP coincide con TOTAL PAGADO",
+        "partiyCheckFail": "ERROR! ¡¡¡¡¡ PAGADO NO COINCIDE CON TOTAL PVP !!!!!! >>>> REVISAR DATOS",
+        "zeroSymbol": "-",
+        "lowTaxMatch": "BOTOX",
+        "iva21": "21",
+        "iva4": "4"
     }
   }

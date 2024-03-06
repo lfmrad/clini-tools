@@ -14,7 +14,6 @@ import xyz.lfmrad.clinitools.Configuration;
 import xyz.lfmrad.clinitools.model.*;
 
 public final class FinancialTools {
-    
     private FinancialTools() {
         throw new AssertionError("FinancialTools should not be instantiated.");
     }
@@ -39,11 +38,8 @@ public final class FinancialTools {
             dateTitleCell.setCellValue(dateFieldTitle);
 
             for (Appointment appointment : appointments) {
-                if(!includeUnpaid && isPaymentPending(appointment)) {
-                    continue;
-                }
                 Row row = sheet.createRow(rowIndex);
-
+               
                 Cell dateCell = row.createCell(0); 
                 dateCell.setCellValue(DateTools.convertToFormattedDateTimeString(appointment.getAppointmentTimeData()));
                 Cell nameCell = row.createCell(1); 
@@ -54,47 +50,75 @@ public final class FinancialTools {
                 double totalPrice = 0;
                 double totalCost = 0;
                 for (Activity activity : appointment.getActivities()) {
+                    if (!includeUnpaid && !activity.isPaidFor()) {
+                        continue;
+                    }
                     Row activityRow = sheet.getRow(rowIndex) == null ? sheet.createRow(rowIndex) : sheet.getRow(rowIndex);
-                    
+
                     Cell activityNameCell = activityRow.createCell(2);
                     activityNameCell.setCellValue(activity.getName());
                     Cell activityPriceCell = activityRow.createCell(3);
                     activityPriceCell.setCellValue(activity.getPrice());
-                    Cell activtyCostWithTaxCell = activityRow.createCell(4);
-                    activtyCostWithTaxCell.setCellValue(-activity.getCostWithTax());
-                    Cell activityCostWithTaxThirdPartyCell = activityRow.createCell(5);
+                    Cell activityNetPriceCell = activityRow.createCell(4);
+                    activityNetPriceCell.setCellValue(activity.getNetPrice());
+
+                    Cell activityPaymentStatus = activityRow.createCell(5);
+                    activityPaymentStatus.setCellValue(activity.getPaymentStatus());
+                    Cell activityCostWithTaxCell = activityRow.createCell(6);
+                    activityCostWithTaxCell.setCellValue(-activity.getCostWithTax());
+
+                    // TEMPORAL SOL.
+                    if (activity.getCostWithTax() > 0) {
+                        Cell activityIVACell = activityRow.createCell(7);
+                        activityIVACell.setCellValue(activity.getTaxValue());    
+                        Cell activityNetCostCell = activityRow.createCell(8);
+                        activityNetCostCell.setCellValue(-activity.getNetCost());    
+                        // TEMP.
+                        // Cell activityNetCostCopyCell = activityRow.createCell(21);
+                        // activityNetCostCopyCell.setCellValue(-activity.getNetCost());       
+                    }
+
+                    Cell activityCostWithTaxThirdPartyCell = activityRow.createCell(9);
                     activityCostWithTaxThirdPartyCell.setCellValue(-activity.getCostWithTaxThirdParty());
-            
+                    
+                    // TEMPORAL SOL.
+                    if (activity.getCostWithTaxThirdParty() > 0) {
+                        Cell activityThirdPartyIVACell = activityRow.createCell(10);
+                        activityThirdPartyIVACell.setCellValue(activity.getTaxValue());    
+                        Cell activityThirdPartyNetCostCell = activityRow.createCell(11);
+                        activityThirdPartyNetCostCell.setCellValue(-activity.getNetCostThirdParty());   
+                    }
+                     
                     rowIndex++;
                     additionalRowsCreated++;
-                    totalPrice += activity.getPrice();
-                    totalCost += -(activity.getCostWithTax() + activity.getCostWithTaxThirdParty());
+                    totalPrice += activity.getNetPrice();
+                    totalCost += -(activity.getNetCost() + activity.getNetCostThirdParty());
                 }
             
                 // comes back to the initial row after adding several activities 
                 int correctedIndex = rowIndex - additionalRowsCreated;
                 row = sheet.getRow(correctedIndex); 
 
-                Cell cashAmountCell = row.createCell(6);
+                Cell cashAmountCell = row.createCell(12);
                 cashAmountCell.setCellValue(appointment.getCashTotal());
-                Cell cardAmountCell = row.createCell(7);
+                Cell cardAmountCell = row.createCell(13);
                 cardAmountCell.setCellValue(appointment.getCardTotal());
-                Cell bizumAmountCell = row.createCell(8);
+                Cell bizumAmountCell = row.createCell(14);
                 bizumAmountCell.setCellValue(appointment.getBizumTotal());
-                Cell financingAmountCell = row.createCell(9);
+                Cell financingAmountCell = row.createCell(15);
                 financingAmountCell.setCellValue(appointment.getFinancingTotal());
-                Cell netProfit = row.createCell(10);
+                Cell netProfit = row.createCell(16);
                 netProfit.setCellValue(totalPrice + totalCost);
-                Cell paymentStatusCell = row.createCell(11);
-                paymentStatusCell.setCellValue(appointment.getPaymentStatus());
-                Cell notesCell = row.createCell(12);
-                notesCell.setCellValue(appointment.getNotes());
 
-                createdColumns = row.getLastCellNum();
+                
+                Cell notesCell = row.createCell(17);
+                notesCell.setCellValue(appointment.getNotes());
 
                 // TEMPORAL FUNCTIONALITY
                 // Implemented through Excel formulas. Pending actual implementation.
-                addTemporaryExcelFormulas(row, correctedIndex + 1, appointment); 
+                addTemporaryExcelFormulas(row, correctedIndex + 1, appointment, includeUnpaid); 
+
+                createdColumns = row.getLastCellNum() + 1;
             
                 int lastRowIndex = rowIndex - 1;  // adjusts for the last row written in this iteration
                 Row lastRowWritten = sheet.getRow(lastRowIndex);
@@ -108,14 +132,13 @@ public final class FinancialTools {
         }
     }
 
-    private static void addTemporaryExcelFormulas(Row row, int excelIndex, Appointment appointment) {
-        
-        Cell invCell = row.createCell(13);
-        invCell.setCellValue(appointment.getTotalPVP());
-        Cell profitCell = row.createCell(14);
-        profitCell.setCellValue(appointment.getProfit());
-        Cell flagCell = row.createCell(15);
-        if ((appointment.getCardTotal() + appointment.getBizumTotal()) > 0) {
+    private static void addTemporaryExcelFormulas(Row row, int excelIndex, Appointment appointment, boolean includeUnpaid) {
+        Cell invCell = row.createCell(18);
+        invCell.setCellValue(appointment.getTotalNetPVP(includeUnpaid));
+        Cell profitCell = row.createCell(19);
+        profitCell.setCellValue(appointment.getNetProfit(includeUnpaid));
+        Cell flagCell = row.createCell(20);
+        if ((appointment.getCardTotal() + appointment.getBizumTotal() + appointment.getFinancingTotal()) > 0) {
             flagCell.setCellValue("x");
         }
     }
@@ -133,9 +156,6 @@ public final class FinancialTools {
         return DateTools.getDateAsFormattedString(appointment.getAppointmentTimeData(), false);
     }
 
-    private static boolean isPaymentPending(Appointment appointment) {
-        return appointment.getPaymentStatus().equals(Configuration.getOtherText().get("pendingPayment"));
-    }
 
     public static void addClientSeparatorLine(Row row, Workbook workbook, int columnLength) {
         for (int i = 0; i < columnLength; i++) { 
@@ -174,29 +194,43 @@ public final class FinancialTools {
     public static void printSummary(List<Appointment> appointments, boolean includeUnpaid) {
         double totalPVP = 0.0;
         double totalCost = 0.0;
+        double totalPaid = 0.0;
         double totalCashPayments = 0.0;
         double totalCardPayments = 0.0;
         double totalBizumPayments = 0.0;
         double totalFinancing = 0.0;
-        int clientsThatHaveNotPaid = 0;
+        double parityCheck = 0.0;
+        int numberOfClients = 0;
         
         for (Appointment appointment : appointments) {
-            if(!includeUnpaid && isPaymentPending(appointment)) {
-                    clientsThatHaveNotPaid++;
-                    continue;
+            if (appointment.hasPayments()) {
+                numberOfClients++;
             }
-            totalPVP += appointment.getTotalPVP();
-            totalCost += appointment.getTotalCost();
+            totalPVP += appointment.getTotalPVP(includeUnpaid);
+            totalCost += appointment.getTotalCost(includeUnpaid);
+            totalPaid += appointment.getTotalPaid();
             totalCashPayments += appointment.getCashTotal();
             totalCardPayments += appointment.getCardTotal();
             totalBizumPayments += appointment.getBizumTotal();
             totalFinancing += appointment.getFinancingTotal();
         }
+
+        parityCheck = totalPVP - totalPaid;
         
-        System.out.println(Configuration.getOtherText().get("summaryHeading"));
-        System.out.println(Configuration.getOtherText().get("numberOfClients") + (appointments.size() - clientsThatHaveNotPaid));
+        System.out.println("\n\n" + Configuration.getOtherText().get("summaryHeading"));
+        System.out.println(Configuration.getOtherText().get("numberOfClients") + numberOfClients);
         System.out.println(Configuration.getOtherText().get("totalPVP") + totalPVP);
         System.out.println(Configuration.getOtherText().get("totalCost") + totalCost);
+        System.out.println(Configuration.getOtherText().get("totalPaid") + totalPaid);
+        System.out.println();
+        System.out.println("\n" + Configuration.getOtherText().get("parityCheck") + parityCheck);
+        if (parityCheck == 0) {
+            System.out.println(Configuration.getOtherText().get("parityCheckSuccess"));
+        } else {
+            System.out.println(Configuration.getOtherText().get("parityCheckFail"));
+        }
+        System.out.println();
+    
         System.out.println(Configuration.getOtherText().get("totalCashPayments") + totalCashPayments);
         System.out.println(Configuration.getOtherText().get("totalCardPayments") + totalCardPayments);
         System.out.println(Configuration.getOtherText().get("totalBizumPayments") + totalBizumPayments);

@@ -156,6 +156,14 @@ public class Configuration {
         return ZoneId.of(customDateTimePatterns.get("zoneId"));
     }
 
+    public static int getIVA21() {
+        return Integer.valueOf(otherText.get("iva21"));
+    }
+
+    public static int getIVA4() {
+        return Integer.valueOf(otherText.get("iva4"));
+    }
+
     private static class ConfigStructure {
         private Map<String, String> customDateTimePatterns;
         private Map<String, String> appointmentsHeaders;

@@ -2,17 +2,21 @@ package xyz.lfmrad.clinitools.model;
 
 import java.util.Objects;
 
+import xyz.lfmrad.clinitools.Configuration;
+
 public class Activity {
     private String name;
     private double price;
     private double costWithTax;
     private double costWithTaxThirdParty;
+    private String paymentStatus;
 
-    public Activity(String name, double price, double costWithTax, double costWithTaxThirdParty) {
+    public Activity(String name, double price, double costWithTax, double costWithTaxThirdParty, String paymentStatus) {
         this.name = name;
         this.price = price;
         this.costWithTax = costWithTax;
         this.costWithTaxThirdParty = costWithTaxThirdParty;
+        this.paymentStatus = paymentStatus;
     }
     
     public String getName() {
@@ -23,20 +27,44 @@ public class Activity {
         return price;
     }
 
-    public double getCostWithTax() {
-        return costWithTax;
+    public double getNetPrice() {
+        return price / 1.21f;
     }
 
-    public double getNetCost() {
-        return costWithTaxThirdParty;
+    public double getCostWithTax() {
+        return costWithTax;
     }
 
     public double getCostWithTaxThirdParty() {
         return costWithTaxThirdParty;
     }
 
+    // TEMP. SEMI HARDCODED SOLUTION
+    public double getTaxValue() {
+        if (this.name.contains(Configuration.getOtherText().get("lowTaxMatch"))) {
+            return Configuration.getIVA4() / 100f;
+        } else {
+            return Configuration.getIVA21() / 100f;
+        }
+    }
+
+    public double getNetCost() {
+        return costWithTax / (1 + getTaxValue());
+    } 
+
     public double getNetCostThirdParty() {
-        return costWithTaxThirdParty;
+        return costWithTaxThirdParty / (1 + getTaxValue());
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public boolean isPaidFor() {
+        if (paymentStatus.equals(Configuration.getOtherText().get("pendingPayment"))) {
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -46,6 +74,7 @@ public class Activity {
                 ", price=" + price +
                 ", costWithTax=" + costWithTax +
                 ", costWithTaxThirdParty=" + costWithTaxThirdParty +
+                ", paymentStatus=" + paymentStatus +
                 '}';
     }
 

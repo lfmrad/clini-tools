@@ -11,7 +11,6 @@ public class Appointment {
     private ZonedDateTime appointmentTimeData;
     private List<Activity> activities; 
     private List<Payment> payments;
-    private String paymentStatus;
     private String notes;
 
     public Appointment() {
@@ -35,47 +34,65 @@ public class Appointment {
         return payments;
     }
 
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
 
     public String getNotes() {
         return notes;
     }
 
-    public double getTotalPVP() {
+    public double getTotalPVP(boolean includeUnpaid) {
         double totalPVP = 0;
         for (Activity activity : activities) {
+            if (!includeUnpaid && !activity.isPaidFor()) {
+                continue;
+            }
             totalPVP += activity.getPrice();
         }
         return totalPVP;
     }
 
-    public double getTotalCost() {
+    public double getTotalNetPVP(boolean includeUnpaid) {
+        return getTotalPVP(includeUnpaid) / (1 + Configuration.getIVA21() / 100f);
+    }
+
+    public double getTotalCost(boolean includeUnpaid) {
         double totalCost = 0;
         for (Activity activity : activities) {
+            if (!includeUnpaid && !activity.isPaidFor()) {
+                continue;
+            }
             totalCost += -(activity.getCostWithTax() + activity.getCostWithTaxThirdParty());
         }
         return totalCost;
     }
 
+    public double getTotalNetCost(boolean includeUnpaid) {
+        double totalNetCost = 0;
+        for (Activity activity : activities) {
+            if (!includeUnpaid && !activity.isPaidFor()) {
+                continue;
+            }
+            totalNetCost += -(activity.getNetCost() + activity.getNetCostThirdParty());
+        }
+        return totalNetCost;
+    }
+
     public double getCashTotal() {
-        return getTotalPaidFor(Configuration.getOtherText().get("cashPayment"));
+        return getTotalPaidWith(Configuration.getOtherText().get("cashPayment"));
     }
 
     public double getCardTotal() {
-        return getTotalPaidFor(Configuration.getOtherText().get("cardPayment"));
+        return getTotalPaidWith(Configuration.getOtherText().get("cardPayment"));
     }
 
     public double getBizumTotal() {
-        return getTotalPaidFor(Configuration.getOtherText().get("bizumPayment"));
+        return getTotalPaidWith(Configuration.getOtherText().get("bizumPayment"));
     }
 
     public double getFinancingTotal() {
-        return getTotalPaidFor(Configuration.getOtherText().get("financingInstallment"));
+        return getTotalPaidWith(Configuration.getOtherText().get("financingInstallment"));
     }
 
-    private double getTotalPaidFor(String paymentMethod) {
+    private double getTotalPaidWith(String paymentMethod) {
         double totalPaid = 0;
         for (Payment payment : payments) {
             if (Configuration.compareStringsIgnoringGrammar(paymentMethod, payment.getPaymentMethod())) {
@@ -85,8 +102,25 @@ public class Appointment {
         return totalPaid;
     }
 
-    public double getProfit() {
-        return getTotalPVP() + getTotalCost();
+    public double getTotalPaid() {
+        double totalPaid = 0;
+        for (Payment payment : payments) {
+            totalPaid += payment.getAmount();
+        }
+        return totalPaid;
+    }
+
+    public double getNetProfit(boolean includeUnpaid) {
+        return getTotalNetPVP(includeUnpaid) + getTotalNetCost(includeUnpaid);
+    }
+
+    public boolean hasPayments() {
+        for (Activity activity : activities) {
+            if (activity.isPaidFor()) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
@@ -120,11 +154,6 @@ public class Appointment {
         // }
     }
 
-    public void setPaymentStatus(String paymentStatus) {
-        if (this.paymentStatus == null) { 
-            this.paymentStatus = paymentStatus;
-        }
-    }
 
     // add concatenation case for multiple notes for same client
     public void setNotes(String notes) {
@@ -148,8 +177,6 @@ public class Appointment {
             sb.append("\t\t").append(activity).append("\n");
         }
 
-        sb.append("\tPayment Status: ").append(paymentStatus).append("\n");
-        
         sb.append("\tPayments: \n");
         for (Payment payment : payments) {
             sb.append("\t\t").append(payment).append("\n");

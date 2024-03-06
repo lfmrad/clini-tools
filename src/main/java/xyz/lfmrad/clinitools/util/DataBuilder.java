@@ -31,9 +31,10 @@ public final class DataBuilder {
             double costWithTax = parseDoubleOrZero(appointmentRow.get(Configuration.getAppointmentsHeaders().get("costWithTax")));
             double costWithTaxThirdParty = parseDoubleOrZero(appointmentRow.get(Configuration.getAppointmentsHeaders().get
             ("costWithTaxThirdParty")));
-            Activity currentActivity = new Activity(activity, price, costWithTax, costWithTaxThirdParty);
-
             String paymentStatus = appointmentRow.get(Configuration.getAppointmentsHeaders().get("paymentStatus"));
+            Activity currentActivity = new Activity(activity, price, costWithTax, costWithTaxThirdParty, paymentStatus);
+
+            
             String notes = appointmentRow.get(Configuration.getAppointmentsHeaders().get("notes"));
         
             Appointment targetAppointment = getAppointment(clientName);
@@ -41,7 +42,6 @@ public final class DataBuilder {
             targetAppointment.setAppointmentTimeData(dateTime);
             targetAppointment.addActivity(currentActivity);
             targetAppointment.setNotes(notes);
-            targetAppointment.setPaymentStatus(paymentStatus);
         }
 
         for (Map<String, String> paymentRow : payments) {
@@ -54,14 +54,13 @@ public final class DataBuilder {
             Appointment targetAppointment = getAppointment(clientName);
             if (targetAppointment.setClientName(clientName)) {
                 targetAppointment.setNotes(Configuration.getOtherText().get("historyError"));
-                targetAppointment.setPaymentStatus(Configuration.getOtherText().get("unknownPayment"));
 
                 String dateAsString = paymentRow.get(Configuration.getPaymentHeaders().get("date"));
                 LocalDate date = LocalDate.parse(dateAsString, Configuration.getDateFormat(false));
                 ZonedDateTime defaultDateTime = date.atStartOfDay(Configuration.getZoneId());
 
                 String activity = paymentRow.get(Configuration.getPaymentHeaders().get("activities"));
-                Activity currentActivity = new Activity(activity, 0, 0, 0);
+                Activity currentActivity = new Activity(activity, 0, 0, 0, Configuration.getOtherText().get("unknownPayment"));
                 
                 targetAppointment.setAppointmentTimeData(defaultDateTime);
                 targetAppointment.addActivity(currentActivity);
