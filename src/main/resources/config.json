@@ -9,7 +9,7 @@
     "locale": "es-ES"
   },
   "appointmentsHeaders": {
-      "date": "F. Actuación",
+      "date": "Fecha Actuación",
       "startHour": "Hora Inicio",
       "finishHour": "Hora Final",
       "name": "Nombre",
