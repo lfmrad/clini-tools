@@ -13,6 +13,7 @@
       "startHour": "Hora Inicio",
       "finishHour": "Hora Final",
       "name": "Nombre",
+      "dni": "NIF/CIF",
       "activities": "Descripción",
       "price": "Precio",
       "costWithTax": "Coste Bruto",
