@@ -47,11 +47,13 @@ public final class DataBuilder {
         for (Map<String, String> paymentRow : payments) {
 
             String clientName = paymentRow.get(Configuration.getPaymentHeaders().get("name"));
+            String dni = paymentRow.get(Configuration.getPaymentHeaders().get("dni"));
 
             String paymentMethod = paymentRow.get(Configuration.getPaymentHeaders().get("paymentMethod"));
             Double paymentAmount = parseDoubleOrZero(paymentRow.get(Configuration.getPaymentHeaders().get("paidAmount")));
-        
+
             Appointment targetAppointment = getAppointment(clientName);
+            targetAppointment.setDni(dni);
             if (targetAppointment.setClientName(clientName)) {
                 targetAppointment.setNotes(Configuration.getOtherText().get("historyError"));
 

@@ -8,6 +8,7 @@ import xyz.lfmrad.clinitools.Configuration;
 
 public class Appointment {
     private String clientName;
+    private String dni;
     private ZonedDateTime appointmentTimeData;
     private List<Activity> activities; 
     private List<Payment> payments;
@@ -20,6 +21,10 @@ public class Appointment {
 
     public String getClientName() {
         return clientName;
+    }
+
+    public String getDni() {
+        return dni;
     }
 
     public ZonedDateTime getAppointmentTimeData() {
@@ -125,8 +130,16 @@ public class Appointment {
 
 
     public boolean setClientName(String clientName) {
-        if (this.clientName == null) { 
+        if (this.clientName == null) {
             this.clientName = clientName;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean setDni(String dni) {
+        if (this.dni == null) {
+            this.dni = dni;
             return true;
         }
         return false;

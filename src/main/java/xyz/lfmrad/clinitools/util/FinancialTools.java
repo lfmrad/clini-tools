@@ -40,10 +40,12 @@ public final class FinancialTools {
             for (Appointment appointment : appointments) {
                 Row row = sheet.createRow(rowIndex);
                
-                Cell dateCell = row.createCell(0); 
+                Cell dateCell = row.createCell(0);
                 dateCell.setCellValue(DateTools.convertToFormattedDateTimeString(appointment.getAppointmentTimeData()));
-                Cell nameCell = row.createCell(1); 
+                Cell nameCell = row.createCell(1);
                 nameCell.setCellValue(appointment.getClientName());
+                Cell dniCell = row.createCell(5);
+                dniCell.setCellValue(appointment.getDni());
 
                 // if there are multiple activities, additional rows are created
                 int additionalRowsCreated = 0;
@@ -62,7 +64,7 @@ public final class FinancialTools {
                     Cell activityNetPriceCell = activityRow.createCell(4);
                     activityNetPriceCell.setCellValue(activity.getNetPrice());
 
-                    Cell activityPaymentStatus = activityRow.createCell(5);
+                    Cell activityPaymentStatus = activityRow.createCell(25);
                     activityPaymentStatus.setCellValue(activity.getPaymentStatus());
                     Cell activityCostWithTaxCell = activityRow.createCell(6);
                     activityCostWithTaxCell.setCellValue(-activity.getCostWithTax());
