@@ -13,6 +13,7 @@
       "startHour": "Hora Inicio",
       "finishHour": "Hora Final",
       "name": "Nombre",
+      "dni": "NIF/CIF",
       "activities": "Descripción",
       "price": "Precio",
       "costWithTax": "Coste Bruto",
@@ -23,7 +24,6 @@
     "paymentHeaders": {
         "date": "Fecha Alta",
         "name": "Nombre",
-        "dni": "DNI",
         "activities": "Concepto",
         "paymentMethod": "Forma de Cobro",
         "paidAmount": "Total",

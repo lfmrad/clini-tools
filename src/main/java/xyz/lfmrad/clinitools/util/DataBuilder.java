@@ -21,6 +21,7 @@ public final class DataBuilder {
     public static List<Appointment> buildAppointmentsList(List<Map<String, String>> payments, List<Map<String, String>> appointments) {
         for (Map<String, String> appointmentRow : appointments) {
             String clientName = appointmentRow.get(Configuration.getAppointmentsHeaders().get("name"));
+            String dni = appointmentRow.get(Configuration.getAppointmentsHeaders().get("dni"));
 
             String timeAsString = appointmentRow.get(Configuration.getAppointmentsHeaders().get("startHour"));
             String dateAsString = appointmentRow.get(Configuration.getAppointmentsHeaders().get("date"));
@@ -39,6 +40,7 @@ public final class DataBuilder {
         
             Appointment targetAppointment = getAppointment(clientName);
             targetAppointment.setClientName(clientName);
+            targetAppointment.setDni(dni);
             targetAppointment.setAppointmentTimeData(dateTime);
             targetAppointment.addActivity(currentActivity);
             targetAppointment.setNotes(notes);
@@ -47,13 +49,11 @@ public final class DataBuilder {
         for (Map<String, String> paymentRow : payments) {
 
             String clientName = paymentRow.get(Configuration.getPaymentHeaders().get("name"));
-            String dni = paymentRow.get(Configuration.getPaymentHeaders().get("dni"));
 
             String paymentMethod = paymentRow.get(Configuration.getPaymentHeaders().get("paymentMethod"));
             Double paymentAmount = parseDoubleOrZero(paymentRow.get(Configuration.getPaymentHeaders().get("paidAmount")));
 
             Appointment targetAppointment = getAppointment(clientName);
-            targetAppointment.setDni(dni);
             if (targetAppointment.setClientName(clientName)) {
                 targetAppointment.setNotes(Configuration.getOtherText().get("historyError"));
 

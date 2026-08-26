@@ -14,6 +14,9 @@ import xyz.lfmrad.clinitools.Configuration;
 import xyz.lfmrad.clinitools.model.*;
 
 public final class FinancialTools {
+    // number of populated columns per settlement row (A..V), used to reapply the template's per-column format
+    private static final int SETTLEMENT_COLUMN_COUNT = 22;
+
     private FinancialTools() {
         throw new AssertionError("FinancialTools should not be instantiated.");
     }
@@ -64,7 +67,7 @@ public final class FinancialTools {
                     Cell activityNetPriceCell = activityRow.createCell(4);
                     activityNetPriceCell.setCellValue(activity.getNetPrice());
 
-                    Cell activityPaymentStatus = activityRow.createCell(25);
+                    Cell activityPaymentStatus = activityRow.createCell(17);
                     activityPaymentStatus.setCellValue(activity.getPaymentStatus());
                     Cell activityCostWithTaxCell = activityRow.createCell(6);
                     activityCostWithTaxCell.setCellValue(-activity.getCostWithTax());
@@ -113,12 +116,16 @@ public final class FinancialTools {
                 netProfit.setCellValue(totalPrice + totalCost);
 
                 
-                Cell notesCell = row.createCell(17);
+                Cell notesCell = row.createCell(18);
                 notesCell.setCellValue(appointment.getNotes());
 
                 // TEMPORAL FUNCTIONALITY
                 // Implemented through Excel formulas. Pending actual implementation.
-                addTemporaryExcelFormulas(row, correctedIndex + 1, appointment, includeUnpaid); 
+                addTemporaryExcelFormulas(row, correctedIndex + 1, appointment, includeUnpaid);
+
+                for (int r = correctedIndex; r < rowIndex; r++) {
+                    applyColumnStyles(sheet.getRow(r), sheet);
+                }
 
                 createdColumns = row.getLastCellNum() + 1;
             
@@ -135,11 +142,11 @@ public final class FinancialTools {
     }
 
     private static void addTemporaryExcelFormulas(Row row, int excelIndex, Appointment appointment, boolean includeUnpaid) {
-        Cell invCell = row.createCell(18);
+        Cell invCell = row.createCell(19);
         invCell.setCellValue(appointment.getTotalNetPVP(includeUnpaid));
-        Cell profitCell = row.createCell(19);
+        Cell profitCell = row.createCell(20);
         profitCell.setCellValue(appointment.getNetProfit(includeUnpaid));
-        Cell flagCell = row.createCell(20);
+        Cell flagCell = row.createCell(21);
         if ((appointment.getCardTotal() + appointment.getBizumTotal() + appointment.getFinancingTotal()) > 0) {
             flagCell.setCellValue("x");
         }
@@ -158,6 +165,23 @@ public final class FinancialTools {
         return DateTools.getDateAsFormattedString(appointment.getAppointmentTimeData(), false);
     }
 
+
+    // POI only falls back to the column's default style (from the template) when reading a cell's
+    // style in memory; it never writes that fallback into the cell itself, so a cell created via
+    // createCell()+setCellValue() alone stays visually unformatted ("General", no fill) unless its
+    // style is explicitly set here.
+    private static void applyColumnStyles(Row row, Sheet sheet) {
+        for (int i = 0; i < SETTLEMENT_COLUMN_COUNT; i++) {
+            Cell cell = row.getCell(i);
+            if (cell == null) {
+                cell = row.createCell(i);
+            }
+            CellStyle columnStyle = sheet.getColumnStyle(i);
+            if (columnStyle != null) {
+                cell.setCellStyle(columnStyle);
+            }
+        }
+    }
 
     public static void addClientSeparatorLine(Row row, Workbook workbook, int columnLength) {
         for (int i = 0; i < columnLength; i++) { 
